@@ -16,21 +16,20 @@ class Model:
     def crea_grafo(self, year):
         self.G.clear()
 
-        teams = self.dao.read_squadre_anno(year)
         salaries = self.dao.read_salary()
+        teams = self.dao.read_squadre_anno(year)
+
+        teams_weights = dict()
+        for team in teams:
+            team_weight = 0
+            for salary in salaries:
+                if salary.team_id == team.id:
+                    team_weight += salary.salary
+            teams_weights[team.id] = team_weight
 
         for team1 in teams:
             for team2 in teams:
-                team1_salary = 0
-                team2_salary = 0
-
-                for salary in salaries:
-                    if salary.team_id == team1.id:
-                        team1_salary += salary.salary
-                    elif salary.team_id == team2.id:
-                        team2_salary += salary.salary
-
-                self.G.add_edge(team1, team2, weight = team1_salary + team2_salary)
+                self.G.add_edge(team1.id, team2.id, weight = teams_weights[team1.id] + teams_weights[team2.id])
 
     def get_neighbors(self, team):
         return self.G.neighbors(team)

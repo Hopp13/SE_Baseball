@@ -16,23 +16,27 @@ class Controller:
         teams = self._model.get_squadre_anno(int(self._view.dd_anno.value))
 
         for team in teams:
-            self._view.dd_squadra.options.append(ft.DropdownOption(text = f"{team.team_code} ({team.name})", key = team))
+            self._view.dd_squadra.options.append(ft.DropdownOption(text = f"{team.team_code} ({team.name})", key = team.id))
 
         self._view.update()
 
     def handle_dettagli(self, e):
         self._view.txt_risultato.controls.clear()
 
-        for node in list(self._model.G.nodes()):
-            print(type(node), node)
-        print(type(self._view.dd_squadra.value), self._view.dd_squadra.value)
-        neighbors = self._model.get_neighbors(self._view.dd_squadra.value)
+        neighbors = self._model.get_neighbors(int(self._view.dd_squadra.value))
         for neighbor in neighbors:
             edges = self._model.get_edges()
             for edge in edges:
-                if edge[0].id == neighbor.id or edge[1].id == neighbor.id:
+                if edge[0] == neighbor or edge[1] == neighbor:
                     peso = edge[2]["weight"]
-            self._view.txt_risultato.controls.append(ft.Text(f"{neighbor.team_code} ({neighbor.name}) - peso: {peso}"))
+            teams = self._model.get_squadre_anno(int(self._view.dd_anno.value))
+            for team in teams:
+                if team.id == neighbor:
+                    actual_team = team
+                    break
+            self._view.txt_risultato.controls.append(ft.Text(f"{actual_team.team_code} ({actual_team.name}) - peso: {peso}"))
+
+        self._view.update()
 
     def handle_percorso(self, e):
         """ Handler per gestire il problema ricorsivo di ricerca del percorso """""
